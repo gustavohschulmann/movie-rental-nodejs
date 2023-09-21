@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://postgres:12345@localhost:5432/movie-rentals"
+}
+
+model User {
+  id         String   @id @default(uuid())
+  name       String
+  email      String
+  password   String
+  isAdmin    Boolean
+  created_at DateTime @default(now())
+
+  rentals Rental[]
+
+  @@map("users")
+}
+
+model Genre {
+  id String @id @default(uuid())
+  name String
+  created_at DateTime @default(now())
+
+  @@map("genres")
+
+  movies Movie[]
+}
+
+model Movie {
+  id String @id @default(uuid())
+  name String
+  description String
+  daily_rate Float
+  fine_amount Float
+  available Boolean
+  created_at DateTime @default(now())
+  genre_id String
+
+  genre Genre @relation(fields: [genre_id], references: [id])
+  rentals Rental[]
+
+  @@map("movies")
+}
+
+model Rental {
+  id String @id @default(uuid())
+  user_id String
+  movie_id String
+  start_at DateTime @default(now())
+  end_at DateTime?
+  expected_return_date DateTime
+  total Float?
+
+  @@map("rentals")
+
+  user User @relation(fields: [user_id], references: [id])
+  movie Movie @relation(fields: [movie_id], references: [id])
+}
+
+//commands:
+//yarn prisma migrate dev
